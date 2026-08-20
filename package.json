@@ -1,0 +1,38 @@
+{
+  "name": "@codexsun/file-manager",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/contracts/src/index.ts",
+    "./api": "./src/api/src/index.ts",
+    "./web": "./src/web/src/index.ts",
+    "./contracts": "./src/contracts/src/index.ts"
+  },
+  "workspaces": [
+    "src/api",
+    "src/web",
+    "src/contracts"
+  ],
+  "scripts": {
+    "build": "npm run clean && npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "check:versions": "node tools/check-versions.mjs",
+    "version:show": "node tools/version.mjs show",
+    "version:bump": "node tools/version-bump.mjs",
+    "changelog:append": "node tools/version.mjs append",
+    "github:now": "node tools/github-now.mjs",
+    "git:release": "node tools/git-release.mjs",
+    "clean": "node tools/clean.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "smoke:startup": "npm run build && node tools/startup-smoke.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  }
+}

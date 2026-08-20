@@ -1,0 +1,22 @@
+{
+  "name": "@codexsun/file-manager-web",
+  "version": "1.0.0",
+  "private": false,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./modules/file-browser": "./src/modules/file-browser/index.ts",
+    "./modules/storage-connection": "./src/modules/storage-connection/index.ts"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.85.5",
+    "lucide-react": "^0.539.0",
+    "react": "^19.1.1",
+    "sonner": "^2.0.7",
+    "zod": "^4.0.17"
+  }
+}
