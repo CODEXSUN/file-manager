@@ -1,6 +1,5 @@
 import { Kysely, MysqlDialect, sql } from "kysely";
 import { createPool } from "mysql2";
-import { createConnection } from "mysql2/promise";
 import { fileManagerEnv } from "../env.js";
 import type { FileObjectTable } from "../modules/file-object/file-object.types.js";
 import type { FolderTable } from "../modules/folder/folder.types.js";
@@ -11,9 +10,22 @@ export type FileManagerDatabase = {
   fm_folders: FolderTable;
   fm_storage_connections: StorageConnectionTable;
   migration_schema: {
-    applied_at: Date;
+    applied_at: Date | null;
+    batch: number;
+    checksum: string;
+    created_at: Date;
+    created_by: string;
+    description: string;
+    error_text: string | null;
     id: number;
-    migration_key: string;
+    name: string;
+    rolled_back_at: Date | null;
+    scope: string;
+    started_at: Date;
+    status: "applied" | "failed" | "rolled_back" | "running";
+    updated_at: Date;
+    uuid: string;
+    version: number;
   };
 };
 
@@ -35,29 +47,7 @@ export function getFileManagerDatabase() {
 }
 
 export async function bootstrapFileManagerDatabase() {
-  const databaseName = fileManagerEnv.FILE_MANAGER_DB_NAME;
-  if (!/^[A-Za-z0-9_]+$/u.test(databaseName)) {
-    throw new Error(
-      "FILE_MANAGER_DB_NAME must contain only letters, numbers, and underscores.",
-    );
-  }
-  const connection = await createConnection({
-    host: fileManagerEnv.FILE_MANAGER_DB_HOST,
-    password: fileManagerEnv.FILE_MANAGER_DB_PASSWORD,
-    port: fileManagerEnv.FILE_MANAGER_DB_PORT,
-    user: fileManagerEnv.FILE_MANAGER_DB_USER,
-  });
-  try {
-    await connection.query(`CREATE DATABASE IF NOT EXISTS \`${databaseName}\``);
-  } finally {
-    await connection.end();
-  }
-  const db = getFileManagerDatabase();
-  await sql`CREATE TABLE IF NOT EXISTS migration_schema (
-    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    migration_key VARCHAR(191) NOT NULL UNIQUE,
-    applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-  ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`.execute(db);
+  await sql`SELECT 1`.execute(getFileManagerDatabase());
 }
 
 export async function closeFileManagerDatabase() {

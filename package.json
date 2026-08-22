@@ -1,6 +1,6 @@
 {
   "name": "@codexsun/file-manager",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": false,
   "type": "module",
   "exports": {
@@ -16,6 +16,7 @@
   ],
   "scripts": {
     "build": "npm run clean && npm run build --workspaces --if-present",
+    "smoke:contracts": "npm run build && node tools/contracts-smoke.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "check:versions": "node tools/check-versions.mjs",
     "version:show": "node tools/version.mjs show",

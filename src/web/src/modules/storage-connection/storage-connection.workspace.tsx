@@ -6,6 +6,7 @@ import { StorageConnectionForm } from "./storage-connection.form.js";
 import {
   storageConnectionKey,
   useStorageConnections,
+  useStorageProviders,
 } from "./storage-connection.hooks.js";
 import { StorageConnectionList } from "./storage-connection.list.js";
 import {
@@ -21,6 +22,7 @@ import "../../file-manager.css";
 
 export function StorageConnectionsWorkspace() {
   const query = useStorageConnections();
+  const providers = useStorageProviders();
   const client = useQueryClient();
   const [editing, setEditing] = useState<
     StorageConnection | null | undefined
@@ -51,6 +53,7 @@ export function StorageConnectionsWorkspace() {
     return (
       <div className="file-manager-page">
         <StorageConnectionForm
+          providers={providers.data ?? []}
           record={editing}
           saving={save.isPending}
           onCancel={() => setEditing(undefined)}
@@ -63,7 +66,10 @@ export function StorageConnectionsWorkspace() {
       <header className="file-manager-header">
         <div>
           <h1>Storage connections</h1>
-          <p>Connect Local, URL, S3, R2, and Google Drive storage.</p>
+          <p>
+            Connect local storage, cloud drives, object storage, and provider
+            add-ons.
+          </p>
         </div>
         <div className="file-manager-actions">
           <button

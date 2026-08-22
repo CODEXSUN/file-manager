@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
-import type { Selectable, Transaction } from "kysely";
+import { sql, type Selectable, type Transaction } from "kysely";
 import { getFileManagerDatabase } from "../../database/file-manager-database.js";
 import type { FileManagerDatabase } from "../../database/file-manager-database.js";
 import { openCredentials } from "../../security/credential-vault.js";
@@ -60,6 +60,25 @@ export class StorageConnectionRepository {
         })
         .execute();
       return uuid;
+    });
+  }
+
+  async ensureLocalDefault(context: FileManagerRequestContext, cipher: string) {
+    const db = getFileManagerDatabase();
+    await db.transaction().execute(async (transaction) => {
+      await clearDefault(transaction, context);
+      const uuid = randomBytes(4).toString("hex");
+      await sql`
+        INSERT INTO fm_storage_connections
+          (uuid, host_key, tenant_id, name, provider, config_json,
+           credentials_cipher, is_default, status)
+        VALUES
+          (${uuid}, ${context.host}, ${context.tenantId}, ${"Local storage"},
+           ${"local"}, ${JSON.stringify({})}, ${cipher}, 1, ${"active"})
+        ON DUPLICATE KEY UPDATE
+          provider=${"local"}, config_json=${JSON.stringify({})},
+          credentials_cipher=${cipher}, is_default=1, status=${"active"}
+      `.execute(transaction);
     });
   }
 

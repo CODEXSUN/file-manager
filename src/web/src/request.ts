@@ -11,6 +11,12 @@ export function configureFileManagerClient(options: FileManagerClientOptions) {
   clientOptions = { ...options, baseUrl: options.baseUrl.replace(/\/$/u, "") };
 }
 
+export function resolveFileManagerUrl(value: string) {
+  if (/^(?:https?:|blob:|data:)/u.test(value)) return value;
+  const path = value.startsWith("/") ? value : `/${value}`;
+  return `${clientOptions.baseUrl}${path}`;
+}
+
 export async function fileManagerRequest<T>(
   path: string,
   init?: RequestInit,

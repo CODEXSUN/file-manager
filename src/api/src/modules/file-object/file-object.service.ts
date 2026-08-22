@@ -82,6 +82,9 @@ export class FileObjectService {
       input.context,
       input.connectionUuid,
     );
+    if (connection.status !== "active") {
+      throw new Error("The selected storage connection is inactive.");
+    }
     const uuid = randomBytes(4).toString("hex");
     await this.repository.create({
       connectionId: connection.id,
@@ -100,8 +103,12 @@ export class FileObjectService {
 
   async content(context: FileManagerRequestContext, uuid: string) {
     const file = await this.required(context, uuid);
-    if (file.externalUrl)
-      return { mimeType: file.mimeType, redirect: file.externalUrl } as const;
+    if (isExternalLink(file))
+      return {
+        mimeType: file.mimeType,
+        name: file.name,
+        redirect: file.externalUrl!,
+      } as const;
     const connection = await this.connections.getInternal(
       context,
       file.connectionUuid,
@@ -109,16 +116,19 @@ export class FileObjectService {
     return {
       body: await getProviderObject(connection, file.providerKey),
       mimeType: file.mimeType,
+      name: file.name,
     } as const;
   }
 
   async remove(context: FileManagerRequestContext, uuid: string) {
     const file = await this.required(context, uuid);
-    const connection = await this.connections.getInternal(
-      context,
-      file.connectionUuid,
-    );
-    await deleteProviderObject(connection, file.providerKey);
+    if (!isExternalLink(file)) {
+      const connection = await this.connections.getInternal(
+        context,
+        file.connectionUuid,
+      );
+      await deleteProviderObject(connection, file.providerKey);
+    }
     await this.repository.remove(context, uuid);
     return { deleted: true as const };
   }
@@ -139,4 +149,11 @@ function safeName(value: string) {
 
 function safeSegment(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]/gu, "-").slice(0, 191);
+}
+
+function isExternalLink(file: {
+  externalUrl: string | null;
+  providerKey: string;
+}) {
+  return Boolean(file.externalUrl && file.externalUrl === file.providerKey);
 }

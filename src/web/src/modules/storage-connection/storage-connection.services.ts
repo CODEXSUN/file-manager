@@ -2,7 +2,10 @@ import { fileManagerRequest } from "../../request.js";
 import type {
   StorageConnection,
   StorageConnectionPayload,
+  StorageProviderDescriptor,
 } from "./storage-connection.types.js";
+export const listStorageProviders = () =>
+  fileManagerRequest<StorageProviderDescriptor[]>("/providers");
 export const listStorageConnections = () =>
   fileManagerRequest<StorageConnection[]>("/connections");
 export const createStorageConnection = (body: StorageConnectionPayload) =>

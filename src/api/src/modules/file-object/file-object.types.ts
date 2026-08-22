@@ -22,6 +22,7 @@ export type FileObjectTable = {
 export type FileObjectRecord = {
   connectionUuid: string;
   createdAt: string;
+  downloadUrl: string;
   folderUuid: string | null;
   kind: "file" | "image";
   mimeType: string;

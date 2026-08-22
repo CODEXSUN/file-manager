@@ -1,4 +1,4 @@
-import { fileManagerRequest } from "../../request.js";
+import { fileManagerRequest, resolveFileManagerUrl } from "../../request.js";
 import type {
   ExternalFilePayload,
   FileObject,
@@ -14,10 +14,16 @@ export const createFolder = (name: string, parentUuid?: string) =>
     method: "POST",
     body: JSON.stringify({ name, parentUuid }),
   });
-export const listFiles = (folderUuid?: string) =>
-  fileManagerRequest<FileObject[]>(
+export const listFiles = async (folderUuid?: string) => {
+  const files = await fileManagerRequest<FileObject[]>(
     `/files${folderUuid ? `?folderUuid=${folderUuid}` : ""}`,
   );
+  return files.map((file) => ({
+    ...file,
+    downloadUrl: resolveFileManagerUrl(file.downloadUrl),
+    url: resolveFileManagerUrl(file.url),
+  }));
+};
 export const uploadFile = (
   file: File,
   folderUuid?: string,

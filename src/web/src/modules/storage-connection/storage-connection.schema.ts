@@ -5,13 +5,10 @@ export const storageConnectionSchema = z
     credentials: z.record(z.string(), z.unknown()).optional(),
     isDefault: z.boolean(),
     name: z.string().trim().min(1, "Connection name is required."),
-    provider: z.enum([
-      "local",
-      "external_url",
-      "s3",
-      "cloudflare_r2",
-      "google_drive",
-    ]),
+    provider: z
+      .string()
+      .trim()
+      .regex(/^[a-z][a-z0-9_-]{1,31}$/u, "Storage provider is invalid."),
     status: z.enum(["active", "inactive"]),
   })
   .strict();

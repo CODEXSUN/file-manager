@@ -8,6 +8,7 @@ export type Folder = {
 export type FileObject = {
   connectionUuid: string;
   createdAt: string;
+  downloadUrl: string;
   folderUuid: string | null;
   kind: "file" | "image";
   mimeType: string;

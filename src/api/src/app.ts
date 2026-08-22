@@ -1,6 +1,5 @@
 import multipart from "@fastify/multipart";
-import type { FastifyInstance, FastifyRequest } from "fastify";
-import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+import type { FastifyInstance } from "fastify";
 import { bootstrapFileManagerDatabase } from "./database/file-manager-database.js";
 import { runFileManagerMigrations } from "./database/migration.js";
 import {
@@ -12,11 +11,18 @@ import {
   storageConnectionMigration,
   storageConnectionModule,
 } from "./modules/storage-connection/index.js";
+import {
+  validatedFileManagerContextResolver,
+  type ResolveFileManagerContext,
+} from "./host.js";
+import {
+  registerStorageProvider,
+  type StorageProviderAdapter,
+} from "./providers/provider-runtime.js";
 
-export type FileManagerApiOptions<Request> = {
-  resolveContext: (
-    request: Request,
-  ) => FileManagerRequestContext | Promise<FileManagerRequestContext>;
+export type FileManagerApiOptions = {
+  providers?: readonly StorageProviderAdapter[];
+  resolveContext: ResolveFileManagerContext;
 };
 
 export const fileManagerApiModuleKeys = [
@@ -25,23 +31,30 @@ export const fileManagerApiModuleKeys = [
   fileObjectModule.key,
 ] as const;
 
-export async function registerFileManagerApi<Request>(
-  app: unknown,
-  options: FileManagerApiOptions<Request>,
+export async function registerFileManagerApi(
+  app: FastifyInstance,
+  options: FileManagerApiOptions,
 ) {
+  if (!app || typeof app.register !== "function") {
+    throw new Error("File Manager requires a Fastify host instance.");
+  }
+  if (!options || typeof options.resolveContext !== "function") {
+    throw new Error("File Manager requires a trusted host context resolver.");
+  }
+
+  const resolveContext = validatedFileManagerContextResolver(
+    options.resolveContext,
+  );
+  for (const provider of options.providers ?? []) {
+    registerStorageProvider(provider);
+  }
   await bootstrapFileManagerDatabase();
   await runFileManagerMigrations([
     storageConnectionMigration,
     folderMigration,
     fileObjectMigration,
   ]);
-  if (!app || typeof (app as { register?: unknown }).register !== "function") {
-    throw new Error("File Manager requires a Fastify host instance.");
-  }
-  const resolveContext = options.resolveContext as unknown as (
-    request: FastifyRequest,
-  ) => FileManagerRequestContext | Promise<FileManagerRequestContext>;
-  await (app as FastifyInstance).register(async (fileManagerApp) => {
+  await app.register(async (fileManagerApp) => {
     await fileManagerApp.register(multipart);
     await storageConnectionModule.register(fileManagerApp, resolveContext);
     await folderModule.register(fileManagerApp, resolveContext);

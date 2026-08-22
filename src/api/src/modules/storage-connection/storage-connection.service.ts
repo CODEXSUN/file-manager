@@ -1,5 +1,8 @@
 import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
-import { testProvider } from "../../providers/provider-runtime.js";
+import {
+  testProvider,
+  validateStorageProviderConfiguration,
+} from "../../providers/provider-runtime.js";
 import { sealCredentials } from "../../security/credential-vault.js";
 import { StorageConnectionRepository } from "./storage-connection.repository.js";
 import type { StorageConnectionInput } from "./storage-connection.types.js";
@@ -9,7 +12,8 @@ export class StorageConnectionService {
     private readonly repository = new StorageConnectionRepository(),
   ) {}
 
-  list(context: FileManagerRequestContext) {
+  async list(context: FileManagerRequestContext) {
+    await this.ensureDefault(context);
     return this.repository.list(context);
   }
 
@@ -17,7 +21,7 @@ export class StorageConnectionService {
     context: FileManagerRequestContext,
     input: StorageConnectionInput,
   ) {
-    validate(input);
+    validate(input, input.credentials ?? {});
     const uuid = await this.repository.create(
       context,
       input,
@@ -31,11 +35,11 @@ export class StorageConnectionService {
     uuid: string,
     input: StorageConnectionInput,
   ) {
-    validate(input);
     const current = await this.required(context, uuid);
     const credentials = Object.keys(input.credentials ?? {}).length
       ? (input.credentials ?? {})
       : current.credentials;
+    validate(input, credentials);
     await this.repository.update(
       context,
       uuid,
@@ -60,9 +64,13 @@ export class StorageConnectionService {
   }
 
   async getInternal(context: FileManagerRequestContext, uuid?: string) {
-    const value = uuid
+    let value = uuid
       ? await this.repository.find(context, uuid)
       : await this.repository.findDefault(context);
+    if (!value && !uuid) {
+      await this.ensureDefault(context);
+      value = await this.repository.findDefault(context);
+    }
     if (!value) throw new Error("An active storage connection is required.");
     return value;
   }
@@ -81,10 +89,23 @@ export class StorageConnectionService {
     if (!connection) throw new Error("Storage connection was not found.");
     return connection;
   }
+
+  private async ensureDefault(context: FileManagerRequestContext) {
+    if (await this.repository.findDefault(context)) return;
+    await this.repository.ensureLocalDefault(context, sealCredentials({}));
+  }
 }
 
-function validate(input: StorageConnectionInput) {
+function validate(
+  input: StorageConnectionInput,
+  credentials: Record<string, unknown>,
+) {
   if (!input.name.trim()) throw new Error("Connection name is required.");
+  validateStorageProviderConfiguration({
+    config: input.config,
+    credentials,
+    provider: input.provider,
+  });
   if (input.provider === "external_url" && !input.config.publicBaseUrl) {
     throw new Error("External URL storage requires a public base URL.");
   }

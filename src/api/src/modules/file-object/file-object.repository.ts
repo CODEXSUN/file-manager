@@ -97,13 +97,14 @@ export class FileObjectRepository {
     return {
       connectionUuid: connection?.uuid ?? "",
       createdAt: new Date(row.created_at).toISOString(),
+      downloadUrl: `/files/${row.uuid}/download`,
       folderUuid: folder?.uuid ?? null,
       kind: row.kind,
       mimeType: row.mime_type,
       name: row.name,
       sizeBytes: Number(row.size_bytes),
       updatedAt: new Date(row.updated_at).toISOString(),
-      url: row.external_url ?? `/file-manager/files/${row.uuid}/content`,
+      url: row.external_url ?? `/files/${row.uuid}/content`,
       uuid: row.uuid,
     };
   }

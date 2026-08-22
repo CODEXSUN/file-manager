@@ -54,6 +54,14 @@ export function FileBrowserList({
             >
               Open
             </a>
+            <a
+              className="file-manager-button"
+              data-variant="outline"
+              download
+              href={file.downloadUrl}
+            >
+              Download
+            </a>
             <button
               className="file-manager-button"
               data-variant="outline"

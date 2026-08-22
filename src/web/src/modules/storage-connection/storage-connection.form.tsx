@@ -4,14 +4,18 @@ import type {
   StorageConnection,
   StorageConnectionPayload,
   StorageProvider,
+  StorageProviderDescriptor,
+  StorageProviderField,
 } from "./storage-connection.types.js";
 
 export function StorageConnectionForm({
+  providers,
   record,
   saving,
   onCancel,
   onSubmit,
 }: {
+  providers: StorageProviderDescriptor[];
   record: StorageConnection | null;
   saving: boolean;
   onCancel: () => void;
@@ -27,6 +31,7 @@ export function StorageConnectionForm({
   const [credentials, setCredentials] = useState<Record<string, unknown>>({});
   const [isDefault, setDefault] = useState(record?.isDefault ?? false);
   const [error, setError] = useState("");
+  const descriptor = providers.find((value) => value.key === provider);
 
   const submit = () => {
     const result = storageConnectionSchema.safeParse({
@@ -65,77 +70,40 @@ export function StorageConnectionForm({
           <span>Provider</span>
           <select
             value={provider}
-            onChange={(event) =>
-              setProvider(event.target.value as StorageProvider)
-            }
+            onChange={(event) => {
+              setProvider(event.target.value as StorageProvider);
+              setConfig({});
+              setCredentials({});
+            }}
           >
-            <option value="local">Local storage</option>
-            <option value="external_url">External URL</option>
-            <option value="s3">Amazon S3</option>
-            <option value="cloudflare_r2">Cloudflare R2</option>
-            <option value="google_drive">Google Drive</option>
+            {providers.map((value) => (
+              <option key={value.key} value={value.key}>
+                {value.label}
+              </option>
+            ))}
           </select>
         </label>
-        {provider !== "local" ? (
-          <Field
-            label="Public base URL"
-            value={text(config.publicBaseUrl)}
-            onChange={(value) => setConfig({ ...config, publicBaseUrl: value })}
+        {descriptor?.fields.map((field) => (
+          <ProviderField
+            field={field}
+            key={`${field.target}:${field.key}`}
+            value={
+              field.target === "config"
+                ? config[field.key]
+                : credentials[field.key]
+            }
+            onChange={(value) => {
+              if (field.target === "config") {
+                setConfig((current) => ({ ...current, [field.key]: value }));
+              } else {
+                setCredentials((current) => ({
+                  ...current,
+                  [field.key]: value,
+                }));
+              }
+            }}
           />
-        ) : null}
-        {["s3", "cloudflare_r2"].includes(provider) ? (
-          <>
-            <Field
-              label="Endpoint"
-              value={text(config.endpoint)}
-              onChange={(value) => setConfig({ ...config, endpoint: value })}
-            />
-            <Field
-              label="Bucket"
-              value={text(config.bucket)}
-              onChange={(value) => setConfig({ ...config, bucket: value })}
-            />
-            <Field
-              label="Region"
-              value={text(config.region)}
-              onChange={(value) => setConfig({ ...config, region: value })}
-            />
-            <Field
-              label="Access key ID"
-              value={text(credentials.accessKeyId)}
-              onChange={(value) =>
-                setCredentials({ ...credentials, accessKeyId: value })
-              }
-            />
-            <Field
-              label="Secret access key"
-              type="password"
-              value={text(credentials.secretAccessKey)}
-              onChange={(value) =>
-                setCredentials({ ...credentials, secretAccessKey: value })
-              }
-            />
-          </>
-        ) : null}
-        {provider === "google_drive" ? (
-          <>
-            <Field
-              label="Root folder ID"
-              value={text(config.rootFolderId)}
-              onChange={(value) =>
-                setConfig({ ...config, rootFolderId: value })
-              }
-            />
-            <Field
-              label="OAuth access token"
-              type="password"
-              value={text(credentials.accessToken)}
-              onChange={(value) =>
-                setCredentials({ ...credentials, accessToken: value })
-              }
-            />
-          </>
-        ) : null}
+        ))}
       </div>
       <label>
         <input
@@ -164,6 +132,37 @@ export function StorageConnectionForm({
         </button>
       </div>
     </section>
+  );
+}
+
+function ProviderField({
+  field,
+  onChange,
+  value,
+}: {
+  field: StorageProviderField;
+  onChange: (value: boolean | string) => void;
+  value: unknown;
+}) {
+  if (field.type === "boolean") {
+    return (
+      <label className="file-manager-field">
+        <span>{field.label}</span>
+        <input
+          checked={Boolean(value)}
+          onChange={(event) => onChange(event.target.checked)}
+          type="checkbox"
+        />
+      </label>
+    );
+  }
+  return (
+    <Field
+      label={`${field.label}${field.required ? " *" : ""}`}
+      type={field.type}
+      value={text(value)}
+      onChange={onChange}
+    />
   );
 }
 

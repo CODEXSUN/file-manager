@@ -1,15 +1,13 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import type { ResolveFileManagerContext } from "../../host.js";
+import { availableStorageProviders } from "../../providers/provider-runtime.js";
 import { StorageConnectionService } from "./storage-connection.service.js";
 
-const provider = z.enum([
-  "local",
-  "external_url",
-  "s3",
-  "cloudflare_r2",
-  "google_drive",
-]);
+const provider = z
+  .string()
+  .trim()
+  .regex(/^[a-z][a-z0-9_-]{1,31}$/u, "Storage provider is invalid.");
 const payload = z
   .object({
     config: z.record(z.string(), z.unknown()),
@@ -27,6 +25,10 @@ export async function registerStorageConnectionRoutes(
   resolveContext: ResolveFileManagerContext,
   service = new StorageConnectionService(),
 ) {
+  app.get("/file-manager/providers", async (request) => {
+    await resolveContext(request);
+    return availableStorageProviders();
+  });
   app.get("/file-manager/connections", async (request) =>
     service.list(await resolveContext(request)),
   );

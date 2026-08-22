@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import { z } from "zod";
 import { fileManagerEnv } from "../../env.js";
 import type { ResolveFileManagerContext } from "../../host.js";
@@ -72,14 +72,34 @@ export async function registerFileObjectRoutes(
   app.get("/file-manager/files/:uuid/content", async (request, reply) => {
     const { uuid } = identifier.parse(request.params);
     const result = await service.content(await resolveContext(request), uuid);
-    if ("redirect" in result && result.redirect)
-      return reply.redirect(result.redirect);
-    return reply.type(result.mimeType).send(result.body);
+    return sendFile(reply, result, false);
+  });
+  app.get("/file-manager/files/:uuid/download", async (request, reply) => {
+    const { uuid } = identifier.parse(request.params);
+    const result = await service.content(await resolveContext(request), uuid);
+    return sendFile(reply, result, true);
   });
   app.delete("/file-manager/files/:uuid", async (request) => {
     const { uuid } = identifier.parse(request.params);
     return service.remove(await resolveContext(request), uuid);
   });
+}
+
+function sendFile(
+  reply: FastifyReply,
+  result:
+    | { body: Buffer; mimeType: string; name: string }
+    | { mimeType: string; name: string; redirect: string },
+  download: boolean,
+) {
+  if ("redirect" in result) return reply.redirect(result.redirect);
+  if (download) {
+    reply.header(
+      "content-disposition",
+      `attachment; filename*=UTF-8''${encodeURIComponent(result.name)}`,
+    );
+  }
+  return reply.type(result.mimeType).send(result.body);
 }
 
 function textField(field: { value?: unknown } | undefined) {
