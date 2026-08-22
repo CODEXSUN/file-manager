@@ -1,6 +1,6 @@
 {
   "name": "@codexsun/file-manager-api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": false,
   "type": "module",
   "exports": {
@@ -11,7 +11,6 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@codexsun/file-manager-contracts": "1.1.0",
     "@aws-sdk/client-s3": "^3.864.0",
     "@fastify/multipart": "^9.2.1",
     "fastify": "^5.5.0",

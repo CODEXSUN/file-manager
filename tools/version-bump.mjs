@@ -3,12 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
-const files = [
-  "package.json",
-  "src/api/package.json",
-  "src/web/package.json",
-  "src/contracts/package.json",
-];
+const files = ["package.json", "src/api/package.json", "src/web/package.json"];
 const current = JSON.parse(
   readFileSync(resolve(root, "package.json"), "utf8"),
 ).version;

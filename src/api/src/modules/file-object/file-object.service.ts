@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+import type { FileManagerRequestContext } from "../../contracts.js";
 import {
   deleteProviderObject,
   getProviderObject,

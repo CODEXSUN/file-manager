@@ -1,4 +1,4 @@
-import { FILE_MANAGER_BUILT_IN_PROVIDERS } from "@codexsun/file-manager-contracts";
+import { FILE_MANAGER_BUILT_IN_PROVIDERS } from "../contracts.js";
 import type {
   StorageProviderAdapter,
   StorageProviderDescriptor,

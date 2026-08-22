@@ -1,4 +1,4 @@
-import type { StorageProvider } from "@codexsun/file-manager-contracts";
+import type { StorageProvider } from "../contracts.js";
 
 export type ProviderConnection = {
   config: Record<string, unknown>;

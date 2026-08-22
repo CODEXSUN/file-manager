@@ -1,5 +1,5 @@
 import type { FastifyRequest } from "fastify";
-import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+import type { FileManagerRequestContext } from "./contracts.js";
 import { z } from "zod";
 
 const requestContextSchema = z.object({

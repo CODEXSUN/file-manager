@@ -1,4 +1,4 @@
-import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+import type { FileManagerRequestContext } from "../../contracts.js";
 import { FolderRepository } from "./folder.repository.js";
 
 export class FolderService {

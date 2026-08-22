@@ -62,5 +62,5 @@ export const fileManagerPluginManifest: FileManagerPluginManifest = {
     contracts: "@codexsun/file-manager/contracts",
     web: "@codexsun/file-manager/web",
   },
-  version: "1.1.0",
+  version: "1.1.1",
 };

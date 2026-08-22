@@ -3,11 +3,7 @@ import { readFile } from "node:fs/promises";
 const root = JSON.parse(
   await readFile(new URL("../package.json", import.meta.url), "utf8"),
 );
-for (const file of [
-  "src/api/package.json",
-  "src/web/package.json",
-  "src/contracts/package.json",
-]) {
+for (const file of ["src/api/package.json", "src/web/package.json"]) {
   const value = JSON.parse(
     await readFile(new URL(`../${file}`, import.meta.url), "utf8"),
   );

@@ -2,11 +2,28 @@
 
 ## Version State
 
-Current version: 1.1.0
+Current version: 1.1.1
 
-Release tag: v-1.1.0
+Release tag: v-1.1.1
 
-Changelog label: v 1.1.0
+Changelog label: v 1.1.1
+
+## v-1.1.1
+
+### [v 1.1.1] 2026-08-22 - Host integration compatibility
+
+#### Database Changes
+
+- Database update: No.
+- Fixed migration ledger detection for shared host databases.
+- Kept one-time adoption support for the legacy File Manager ledger.
+
+#### App Codebase Changes
+
+- Moved public contracts into the installable root package.
+- Removed the private contract workspace dependency from API imports.
+- Added all runtime dependencies to the root package for Git consumers.
+- Kept public API, web, and contract import paths stable.
 
 ## v-1.1.0
 

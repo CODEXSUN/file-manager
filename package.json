@@ -1,18 +1,17 @@
 {
   "name": "@codexsun/file-manager",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "private": false,
   "type": "module",
   "exports": {
-    ".": "./src/contracts/src/index.ts",
+    ".": "./src/api/src/contracts.ts",
     "./api": "./src/api/src/index.ts",
     "./web": "./src/web/src/index.ts",
-    "./contracts": "./src/contracts/src/index.ts"
+    "./contracts": "./src/api/src/contracts.ts"
   },
   "workspaces": [
     "src/api",
-    "src/web",
-    "src/contracts"
+    "src/web"
   ],
   "scripts": {
     "build": "npm run clean && npm run build --workspaces --if-present",
@@ -29,11 +28,26 @@
     "format:check": "prettier --check .",
     "smoke:startup": "npm run build && node tools/startup-smoke.mjs"
   },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@fastify/multipart": "^9.2.1",
+    "@tanstack/react-query": "^5.85.5",
+    "fastify": "^5.5.0",
+    "kysely": "^0.28.5",
+    "lucide-react": "^0.539.0",
+    "mysql2": "^3.14.3",
+    "sonner": "^2.0.7",
+    "zod": "^4.0.17"
+  },
   "devDependencies": {
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "prettier": "^3.6.2",
     "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
   }
 }

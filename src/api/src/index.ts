@@ -13,4 +13,4 @@ export type {
   StorageProviderDescriptor,
   StorageProviderField,
 } from "./providers/provider.types.js";
-export type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+export type { FileManagerRequestContext } from "./contracts.js";

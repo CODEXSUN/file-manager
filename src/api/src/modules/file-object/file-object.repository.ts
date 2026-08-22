@@ -1,4 +1,4 @@
-import type { FileManagerRequestContext } from "@codexsun/file-manager-contracts";
+import type { FileManagerRequestContext } from "../../contracts.js";
 import { getFileManagerDatabase } from "../../database/file-manager-database.js";
 import type {
   FileObjectRecord,

@@ -1,5 +1,5 @@
 import type { Generated } from "kysely";
-import type { FileManagerHost } from "@codexsun/file-manager-contracts";
+import type { FileManagerHost } from "../../contracts.js";
 
 export type FileObjectTable = {
   connection_id: number;

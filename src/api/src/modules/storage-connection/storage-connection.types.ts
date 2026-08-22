@@ -1,8 +1,5 @@
 import type { Generated } from "kysely";
-import type {
-  FileManagerHost,
-  StorageProvider,
-} from "@codexsun/file-manager-contracts";
+import type { FileManagerHost, StorageProvider } from "../../contracts.js";
 
 export type StorageConnectionTable = {
   config_json: string;
